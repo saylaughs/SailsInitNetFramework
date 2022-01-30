@@ -35,8 +35,8 @@ namespace SailsInitNetFramework
             this.ToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.安装SailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.installNpmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chartExt1 = new WinformControlLibraryExtension.ChartExt();
             this.label1 = new System.Windows.Forms.Label();
+            this.chartExt1 = new WinformControlLibraryExtension.ChartExt();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,26 +59,27 @@ namespace SailsInitNetFramework
             this.ToolStripMenuItem1,
             this.ToolStripMenuItem2});
             this.ToolStripMenuItem.Name = "ToolStripMenuItem";
-            this.ToolStripMenuItem.Size = new System.Drawing.Size(53, 24);
+            this.ToolStripMenuItem.Size = new System.Drawing.Size(53, 26);
             this.ToolStripMenuItem.Text = "项目";
             // 
             // ToolStripMenuItem1
             // 
             this.ToolStripMenuItem1.Name = "ToolStripMenuItem1";
-            this.ToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
+            this.ToolStripMenuItem1.Size = new System.Drawing.Size(152, 26);
             this.ToolStripMenuItem1.Text = "新建项目";
             this.ToolStripMenuItem1.Click += new System.EventHandler(this.新建项目ToolStripMenuItem1_Click);
             // 
             // ToolStripMenuItem2
             // 
             this.ToolStripMenuItem2.Name = "ToolStripMenuItem2";
-            this.ToolStripMenuItem2.Size = new System.Drawing.Size(224, 26);
+            this.ToolStripMenuItem2.Size = new System.Drawing.Size(152, 26);
             this.ToolStripMenuItem2.Text = "导入项目";
+            this.ToolStripMenuItem2.Click += new System.EventHandler(this.ToolStripMenuItem2_Click);
             // 
             // 安装SailsToolStripMenuItem
             // 
             this.安装SailsToolStripMenuItem.Name = "安装SailsToolStripMenuItem";
-            this.安装SailsToolStripMenuItem.Size = new System.Drawing.Size(85, 24);
+            this.安装SailsToolStripMenuItem.Size = new System.Drawing.Size(85, 26);
             this.安装SailsToolStripMenuItem.Text = "下载Sails";
             // 
             // installNpmToolStripMenuItem
@@ -86,6 +87,16 @@ namespace SailsInitNetFramework
             this.installNpmToolStripMenuItem.Name = "installNpmToolStripMenuItem";
             this.installNpmToolStripMenuItem.Size = new System.Drawing.Size(105, 24);
             this.installNpmToolStripMenuItem.Text = "Install Npm";
+            this.installNpmToolStripMenuItem.Click += new System.EventHandler(this.installNpmToolStripMenuItem_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(192)))));
+            this.label1.Location = new System.Drawing.Point(280, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(0, 15);
+            this.label1.TabIndex = 1;
             // 
             // chartExt1
             // 
@@ -98,15 +109,6 @@ namespace SailsInitNetFramework
             this.chartExt1.TabIndex = 0;
             this.chartExt1.TabStop = false;
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(192)))));
-            this.label1.Location = new System.Drawing.Point(280, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(0, 15);
-            this.label1.TabIndex = 1;
-            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -115,8 +117,10 @@ namespace SailsInitNetFramework
             this.Controls.Add(this.label1);
             this.Controls.Add(this.chartExt1);
             this.Controls.Add(this.menuStrip1);
+            this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Main";
+            this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Sail初始化";
             this.Load += new System.EventHandler(this.Form1_Load);

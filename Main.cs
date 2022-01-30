@@ -1,40 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WinformControlLibraryExtension;
-using static WinformControlLibraryExtension.GroupPanelExt;
-using static WinformControlLibraryExtension.TextCarouselExt;
 
 namespace SailsInitNetFramework
 {
     public partial class Main : Form
     {
+
+        private static InitPro init;
         public Main()
         {
             Control.CheckForIllegalCrossThreadCalls = false;
             InitializeComponent();
         }
 
+
+
         private void 新建项目ToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-           var proPath =  setInitSpace();  //选择新建项目地址
 
-            InitPro init = new InitPro();
+            if (init!=null) {  init.Close(); }
+
+           var proPath =  setInitSpace("选择新建项目地址");  //选择新建项目地址 
+            if (string.IsNullOrEmpty(proPath))
+            {
+                return;
+            }
+            init = new InitPro();
+            init.MdiParent = this;
+            init.num = 0;
             init.initPath = proPath;
-            init.ShowDialog();
+            init.TopLevel = false;
+            init.Parent = this.chartExt1; 
+            init.Show();
+            init.BringToFront();
         }
 
 
-        private string setInitSpace() 
+        private string setInitSpace(string Description) 
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
-            dialog.Description = "请选择新建项目地址...";
+            dialog.Description = Description;
             DialogResult da = DialogResult.None;
             if (dialog.ShowDialog() == DialogResult.OK)
             {
@@ -43,7 +50,7 @@ namespace SailsInitNetFramework
                 da = MessageBoxExt.Show(this, @"是否选择地址：" + foldPath + "?", "提示", MessageBoxExtButtons.YesNoCancel, MessageBoxExtIcon.Question);
                 if (da == DialogResult.No)
                 {
-                    setInitSpace(); 
+                    setInitSpace("选择新建项目地址"); 
                 }
                 else {
                     return foldPath;
@@ -55,7 +62,7 @@ namespace SailsInitNetFramework
         }
 
         private async void Form1_Load(object sender, EventArgs e)
-        { 
+        {
             var command = "node -v";
             var nodeVersion = await GetNodeVersion(command);
             this.label1.Text = "你的Node.js版本是：" + nodeVersion;
@@ -69,5 +76,29 @@ namespace SailsInitNetFramework
             }
             return result;
         }
+
+        private void ToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            if (init != null) { init.Close(); }
+
+            var proPath = setInitSpace("请选择导入的项目路径");  // 
+            init = new InitPro();
+            init.num = 1;
+            init.initPath = proPath;
+            init.TopLevel = false;
+            init.Parent = this.chartExt1;
+            init.Show();
+            init.BringToFront();
+        }
+
+        private void installNpmToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Test test = new Test();
+            test.TopLevel = false;
+            test.Parent = this.chartExt1;
+            test.Show();
+            test.BringToFront(); 
+        }
+
     }
 }
