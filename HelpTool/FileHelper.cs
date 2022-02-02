@@ -14,7 +14,7 @@ namespace SailsInitNetFramework
         /// <returns></returns>
         public List<string> readFiles(string path)
         {
-            StreamReader reader = new StreamReader(path, Encoding.UTF8);
+            StreamReader reader = new StreamReader(path, Encoding.UTF8); 
             string lines;
             readList = new List<string>();
             while ((lines = reader.ReadLine()) != null)
