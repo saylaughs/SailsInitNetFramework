@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Runtime.Remoting.Lifetime;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using WinformControlLibraryExtension;
+using static System.Net.WebRequestMethods;
 
 namespace SailsInitNetFramework
 {
@@ -19,20 +23,28 @@ namespace SailsInitNetFramework
         public int num { get; set; }
         public string proName { get; set; }
         public static bool isOpen { get; set; } = false;
+
+
+        public string workPath { get; set; }
         private async void InitPro_Load(object sender, EventArgs e)
         {
             this.slideMenuExt1.Visible = false;
             isOpen = true;
+
+            this.slideMenuExt1.MenuPanel.Drag.Draging += Draw_Drawing;
+            this.slideMenuExt1.MenuPanel.SelectedChanged += MenuPanel_SelectedChanged;
 
             var path = checkPath();
             if (string.IsNullOrEmpty(path)) {  return; }
             var sailsVersion = await checkSails(path);
             switch (num) {
                 case 0:
+                    workPath = path;
                     await sailsInit(path, await getInput());
                     break;
                 case 1:
                     proName =  path.Substring( path.LastIndexOf("\\") + 1);
+                    workPath = path;
                     path = path.Substring(0,path.LastIndexOf("\\"));
                     //SlideMenuPanelExt.Node menuItem1 = new SlideMenuPanelExt.Node(null) { ItemType = SlideMenuPanelExt.NodeTypes.Menu, Text = proName };
                     //menu = new SlideMenuPanelExt.Node(null) { ItemType = SlideMenuPanelExt.NodeTypes.Menu, Text = proName };
@@ -66,15 +78,16 @@ namespace SailsInitNetFramework
             }
              menuPanel.Nodes.Add(menu);
              menuPanel.RestMenuNodes();
+             menuPanel.ExpandFirstNode();
         }
 
         private SlideMenuPanelExt.Node FindNode(SlideMenuPanelExt.Node menuItem, TreeNode tnParent)
         {
-            SlideMenuPanelExt.Node tnRet = null;
+            SlideMenuPanelExt.Node tnRet;
             foreach (TreeNode tn in tnParent.Nodes)
             {
                 var type = tn.Text.Contains(".") ? SlideMenuPanelExt.NodeTypes.MenuTab: SlideMenuPanelExt.NodeTypes.Menu;
-                tnRet = new SlideMenuPanelExt.Node(menuItem){ ItemType = type, Text = tn.Text };
+                tnRet = new SlideMenuPanelExt.Node(menuItem){ ItemType = type, Text = tn.Text  };
                 menuItem.Children.Add(tnRet); 
                 FindNode(tnRet,tn);
             }
@@ -94,6 +107,11 @@ namespace SailsInitNetFramework
                 this.Invoke(new Action(() =>
                 {
                     str = Interaction.InputBox("请输入项目名称", "提示信息", "", -1, -1);
+                    if (string.IsNullOrEmpty(str))
+                    {
+                        MessageBoxExt.Show(this, @"名称不能为空", "提示", MessageBoxExtButtons.OK, MessageBoxExtIcon.Question);
+                        this.Close();
+                    }
                 }));
 
                 return str;
@@ -144,7 +162,7 @@ namespace SailsInitNetFramework
             //await RunCommand.RunCMDCommand("cd "+path);
             string command = $"sails new {str} --fast ";
             var result = await RunCommand.RunCMDCommandMany(path,command);
-            if (!string.IsNullOrEmpty(result))
+            if (!string.IsNullOrEmpty(result)&&!string.IsNullOrEmpty(str))
             {
                 MessageBoxExt.Show(this, result, "提示", MessageBoxExtButtons.OK, MessageBoxExtIcon.Question);
                 // SlideMenuPanelExt.Node menuItem1 = new SlideMenuPanelExt.Node(null) { ItemType = SlideMenuPanelExt.NodeTypes.Menu, Text = str };
@@ -155,14 +173,10 @@ namespace SailsInitNetFramework
 
         private void load(TreeNodeCollection fNodes, string path,string proName) 
         {
-            this.slideMenuExt1.Visible = true;
-            //this.Bind(this.slideMenuExt1.MenuPanel, path + "/" + proName);
-            this.slideMenuExt1.MenuPanel.Drag.Draging += Draw_Drawing;
-
+            this.slideMenuExt1.Visible = true;  
             this.BuildDirectoryNode(fNodes, path+"/"+proName); 
             TreeNode tv = new TreeNode();
-            BuildMneu(this.slideMenuExt1.MenuPanel, fNodes, proName);
-            //this.Controls.Add(tv);
+            BuildMneu(this.slideMenuExt1.MenuPanel, fNodes, proName); 
         }
 
         private void Draw_Drawing(object sender, SlideMenuPanelExt.DragingEventArgs e)
@@ -172,62 +186,46 @@ namespace SailsInitNetFramework
             this.panel1.Location = new Point(this.slideMenuExt1.Right, this.panel1.Location.Y);
         }
 
-
-        //private void Bind(SlideMenuPanelExt menuPanel,string path)
-        //{
-        //    SlideMenuPanelExt.Node menuItem1 = new SlideMenuPanelExt.Node(null) { ItemType = SlideMenuPanelExt.NodeTypes.Menu, Text = "UI Elements" };
-        //    SlideMenuPanelExt.Node menuItem11 = new SlideMenuPanelExt.Node(menuItem1) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Typography" };
-        //    SlideMenuPanelExt.Node menuItem12 = new SlideMenuPanelExt.Node(menuItem1) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Buttons" };
-        //    SlideMenuPanelExt.Node menuItem13 = new SlideMenuPanelExt.Node(menuItem1) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Carousel" };
-        //    SlideMenuPanelExt.Node menuItem14 = new SlideMenuPanelExt.Node(menuItem1) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Notifications" };
-        //    SlideMenuPanelExt.Node menuItem15 = new SlideMenuPanelExt.Node(menuItem1) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Progressbars" };
-        //    SlideMenuPanelExt.Node menuItem16 = new SlideMenuPanelExt.Node(menuItem1) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Media" };
-        //    SlideMenuPanelExt.Node menuItem17 = new SlideMenuPanelExt.Node(menuItem1) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Tooltips" };
-        //    menuItem1.Children.Add(menuItem11);
-        //    menuItem1.Children.Add(menuItem12);
-        //    menuItem1.Children.Add(menuItem13);
-        //    menuItem1.Children.Add(menuItem14);
-        //    menuItem1.Children.Add(menuItem15);
-        //    menuItem1.Children.Add(menuItem16);
-        //    menuItem1.Children.Add(menuItem17);
-        //    menuPanel.Nodes.Add(menuItem1);
-
-        //    SlideMenuPanelExt.Node menuItem2 = new SlideMenuPanelExt.Node(null) { ItemType = SlideMenuPanelExt.NodeTypes.Menu, Text = "Forms", Data = "9" };
-
-        //    SlideMenuPanelExt.Node menuItem21 = new SlideMenuPanelExt.Node(menuItem2) { ItemType = SlideMenuPanelExt.NodeTypes.Menu, Text = "Form Control" };
-        //    SlideMenuPanelExt.Node menuItem211 = new SlideMenuPanelExt.Node(menuItem21) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Form Elements" };
-        //    SlideMenuPanelExt.Node menuItem212 = new SlideMenuPanelExt.Node(menuItem21) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Form Validation" };
-        //    SlideMenuPanelExt.Node menuItem213 = new SlideMenuPanelExt.Node(menuItem21) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Form Switch" };
-        //    SlideMenuPanelExt.Node menuItem214 = new SlideMenuPanelExt.Node(menuItem21) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Form Checkbox" };
-        //    SlideMenuPanelExt.Node menuItem215 = new SlideMenuPanelExt.Node(menuItem21) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Form Radio" };
-        //    menuItem21.Children.Add(menuItem211);
-        //    menuItem21.Children.Add(menuItem212);
-        //    menuItem21.Children.Add(menuItem213);
-        //    menuItem21.Children.Add(menuItem214);
-        //    menuItem21.Children.Add(menuItem215);
-        //    menuItem2.Children.Add(menuItem21); 
+        private List<FileInfo> getAllFiles(DirectoryInfo dir, List<FileInfo> files)
+{
+            var fil =  dir.GetFiles();
+            DirectoryInfo[] di = dir.GetDirectories();
+            foreach (FileInfo f in fil)
+            {
+                files.Add(f);
+            }
+            foreach (var d in di)
+            {
+                getAllFiles(d, files);
+            }
+            return files;
+        }
 
 
-        //    SlideMenuPanelExt.Node menuItem22 = new SlideMenuPanelExt.Node(menuItem2) { ItemType = SlideMenuPanelExt.NodeTypes.Menu, Text = "Forms Wizard" };
-        //    SlideMenuPanelExt.Node menuItem221 = new SlideMenuPanelExt.Node(menuItem22) { ItemType = SlideMenuPanelExt.NodeTypes.Menu, Text = "Simple Wizard" };
-        //    {
-        //        SlideMenuPanelExt.Node menuItem2211 = new SlideMenuPanelExt.Node(menuItem221) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Forms Edit" };
-        //        SlideMenuPanelExt.Node menuItem2212 = new SlideMenuPanelExt.Node(menuItem221) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Forms Add" };
-        //        SlideMenuPanelExt.Node menuItem2213 = new SlideMenuPanelExt.Node(menuItem221) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Forms List" };
-        //        menuItem221.Children.Add(menuItem2211);
-        //        menuItem221.Children.Add(menuItem2212);
-        //        menuItem221.Children.Add(menuItem2213);
-        //    }
-        //    SlideMenuPanelExt.Node menuItem222 = new SlideMenuPanelExt.Node(menuItem22) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Validate Wizard" };
-        //    SlideMenuPanelExt.Node menuItem223 = new SlideMenuPanelExt.Node(menuItem22) { ItemType = SlideMenuPanelExt.NodeTypes.MenuTab, Text = "Vertical Wizard" };
-        //    menuItem22.Children.Add(menuItem221);
-        //    menuItem22.Children.Add(menuItem222);
-        //    menuItem22.Children.Add(menuItem223);
-        //    menuItem2.Children.Add(menuItem22);
-             
-        //    menuPanel.Nodes.Add(menuItem2); 
-        //    menuPanel.RestMenuNodes();
-        //}
+        private void MenuPanel_SelectedChanged(object sender, SlideMenuPanelExt.SelectedChangedEventArgs e)
+        {
+            DirectoryInfo dir = new DirectoryInfo(workPath);
+            DirectoryInfo[] dii = dir.GetDirectories();
+            List<FileInfo> files = new List<FileInfo>();
+            foreach (var d in dii)
+            {
+                getAllFiles(d,files);
+            }
+           
+            if (!string.IsNullOrEmpty(workPath))
+{ 
+                var file = files.Where(o=>o.FullName.Contains(e.Node.Text))?.ToList()[0].FullName;
+                if (System.IO.File.Exists(file)) 
+                {
+                    FileHelper fileHelper = new FileHelper();
+                    Console.WriteLine(e.Node.Text);
+                    List<string> text = fileHelper.readFiles(file);
+                    this.label1.Text = string.Join("", text.ToArray());
+                }
+               
+            }
+        }
+
 
         private void slideMenuExt1_PatternChanged(object sender, SlideMenuExt.PatternChangedEventArgs e)
         { 
